@@ -69,7 +69,14 @@ void Tree::build(string z, string s, node* p) {
 
     }
     else if(z == "prefix"){
-        
+        if(s[0] == '+' || s[0] == '-' || s[0] == '*' || s[0] == '/'){
+            p->setval(s[0]);
+            build(z, s.substr(1), p->getl());
+        }
+        else{
+            p->setval(s[0]);
+            return;
+        }
     }
     else if(z == "postfix"){
 
