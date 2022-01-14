@@ -54,7 +54,7 @@ node::node(string c) {
 class Tree{
     node* root;
     Tree();
-    void build(string z, string s, node* p);
+    string build(string z, string s, node* p);
     string makepostfix(node* p);
     string makeprefix(node* p);
     string makeinfix();
@@ -64,23 +64,29 @@ Tree::Tree() {
     root = nullptr;
 }
 
-void Tree::build(string z, string s, node* p) {
+string Tree::build(string z, string s, node* p) {
     if(z == "infix"){
-
+        return s;
     }
     else if(z == "prefix"){
         if(s[0] == '+' || s[0] == '-' || s[0] == '*' || s[0] == '/'){
-            p->setval(s[0]);
-            build(z, s.substr(1), p->getl());
+            string s1 = s.substr(0, 1);
+            p->setval(s1);
+            s = build(z, s.substr(2), p->getl());
+            s = build(z, s.substr(1), p->getr());
         }
         else{
-            p->setval(s[0]);
-            return;
+            int i = 0;
+            while(s[i] != ' ') i++;
+            p->setval(s.substr(0, i));
+            s = s.substr(i + 1);
+            return s;
         }
     }
     else if(z == "postfix"){
-
+        return s;
     }
+    return s;
 }
 
 string Tree::makepostfix(node* p) {
