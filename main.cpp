@@ -176,5 +176,7 @@ node *Tree::getroot() {
 int main() {
     string z, s;
     cin >> z >> s;
+    Tree tree;
+    tree.build(z, s, tree.getroot());
     return 0;
 }
