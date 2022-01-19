@@ -1,12 +1,12 @@
 #include <iostream>
 #include "vector"
+#include "algorithm"
 #include "string"
 #include "sstream"
 
 using namespace std;
 
 class node{
-public:
     string s;
     node* l;
     node* r;
@@ -75,35 +75,46 @@ Tree::Tree() {
 
 void Tree::build(const string& z, string& s, node* p) {
     if(z == "infix") {
-        if (blnc.empty()){
-            blnc.resize(s.size());
+        if (blnc.empty()) {
+            blnc.resize(s.size(), 10);
             int balance = 0;
             for (int i = 0; i < s.size(); i++) {
                 if (s[i] == '(') {
                     balance++;
                     blnc[i] = balance;
-                }
-                else if (s[i] == ')') {
+                } else if (s[i] == ')') {
                     balance--;
                     blnc[i] = balance;
-                }
-                else{
+                } else {
                     blnc[i] = balance;
                 }
             }
-            int min = 1e9 + 7;
-            int mini = -1;
-            for(int i = s.size() - 1;i >= 0;i--){
-                if(blnc[i] < min){
-                    min = blnc[i];
-                    mini = i;
-                }
-            }
-            int j = mini;
-            while(blnc[j] == mini && (s[j] != '+' && s[j] != '-' && s[j] != '*' && s[j] != '/')) j--;
-            //p->setval(s.substr(j, 1));
         }
-
+        int min = 1e9 + 7, minel = 0;
+        for(int i = s.size() - 1;i >= 0;i--){
+            if(blnc[i] < min){
+                min = blnc[i];
+                minel = i;
+            }
+        }
+        int i = minel;
+        while(i >= 0 && (s[i] != '+' && s[i] != '-' && s[i] != '*' && s[i] != '/')) i--;
+        if(i == -1){
+            for(int i = 0;i < s.size();i++){
+                if(s[i] == ' ') s = s.substr(0, i) + s.substr(i + 1);
+            }
+            p->setval(s);
+            return;
+        }
+        p->setval(s.substr(i, 1));
+        node* r = new node("");
+        p->setr(r);
+        node* l = new node("");
+        p->setl(l);
+        string sl = s.substr(0, i);
+        string sr = s.substr(i + 1);
+        build(z, sl, p->getl());
+        build(z, sr, p->getr());
     }
     else if(z == "prefix"){
         if(s[0] == '+' || s[0] == '-' || s[0] == '*' || s[0] == '/'){
@@ -197,7 +208,7 @@ void Tree::setroot(node* p) {
 }
 
 int main() {
-    string z = "prefix", s;
+    string z = "infix", s;
     getline(cin, s);
     Tree tree;
     node p("");
