@@ -6,6 +6,7 @@
 using namespace std;
 
 class node{
+public:
     string s;
     node* l;
     node* r;
@@ -51,6 +52,8 @@ void node::setval(string str) {
 }
 
 node::node(string c) {
+    l = nullptr;
+    r = nullptr;
     s = c;
 }
 
@@ -59,18 +62,18 @@ class Tree{
     vector<int> blnc;
 public:
     node* getroot();
+    void setroot(node* p);
     Tree();
-    string build(const string& z, string s, node* p);
+    void build(const string& z, string& s, node* p);
     string makepostfix(node* p);
     string makeprefix(node* p);
     string makeinfix(node* p);
 };
 
 Tree::Tree() {
-    root = nullptr;
 }
 
-string Tree::build(const string& z, string s, node* p) {
+void Tree::build(const string& z, string& s, node* p) {
     if(z == "infix") {
         if (blnc.empty()){
             blnc.resize(s.size());
@@ -98,7 +101,7 @@ string Tree::build(const string& z, string s, node* p) {
             }
             int j = mini;
             while(blnc[j] == mini && (s[j] != '+' && s[j] != '-' && s[j] != '*' && s[j] != '/')) j--;
-            p->setval(s.substr(j, 1));
+            //p->setval(s.substr(j, 1));
         }
 
     }
@@ -106,44 +109,59 @@ string Tree::build(const string& z, string s, node* p) {
         if(s[0] == '+' || s[0] == '-' || s[0] == '*' || s[0] == '/'){
             string s1 = s.substr(0, 1);
             p->setval(s1);
-            s = build(z, s.substr(2), p->getl());
-            s = build(z, s, p->getr());
+            node* r = new node("");
+            p->setr(r);
+            node* l = new node("");
+            p->setl(l);
+            s = s.substr((2));
+            build(z, s, p->getl());
+            build(z, s, p->getr());
         }
         else{
             int i = 0;
-            while(s[i] != ' ') i++;
+            while(i < s.size() && s[i] != ' ') i++;
             p->setval(s.substr(0, i));
-            s = s.substr(i + 1);
-            return s;
+            if(i < s.size())
+                s = s.substr(i + 1);
+            else
+                return;
+            return;
         }
     }
     else if(z == "postfix"){
         if(s[s.size() - 1] == '+' || s[s.size() - 1] == '-' || s[s.size() - 1] == '*' || s[s.size() - 1] == '/'){
             string s1 = s.substr(s.size() - 1);
             p->setval(s1);
-            s = build(z, s.substr(0, s.size() - 2), p->getr());
-            s = build(z, s, p->getl());
+            node* r = new node("");
+            p->setr(r);
+            node* l = new node("");
+            p->setl(l);
+            s = s.substr(0, s.size() - 2);
+            build(z, s, p->getr());
+            build(z, s, p->getl());
         }
         else{
             int i = s.size() - 1;
-            while(s[i] != ' ') i--;
-            p->setval(s.substr(i));
+            while(i >= 0 && s[i] != ' ') i--;
+            if(i != -1)
+                p->setval(s.substr(i + 1));
+            else
+                p->setval(s);
             s = s.substr(0, i);
-            return s;
+            return;
         }
-        return s;
+        return;
     }
-    return s;
+    return;
 }
 
 string Tree::makepostfix(node* p) {
     string s = "";
     if(p == nullptr) return "";
     s += makepostfix(p->getl());
-    s += " ";
     s += makepostfix(p->getr());
-    s += " ";
     s += p->getval();
+    s += " ";
     return s;
 }
 
@@ -151,6 +169,7 @@ string Tree::makeprefix(node* p) {
     string s = "";
     if(p == nullptr) return "";
     s += p->getval();
+    s += " ";
     s += makeprefix(p->getl());
     s += makeprefix(p->getr());
     return s;
@@ -173,10 +192,17 @@ node *Tree::getroot() {
     return root;
 }
 
+void Tree::setroot(node* p) {
+    root = p;
+}
+
 int main() {
-    string z, s;
-    cin >> z >> s;
+    string z = "prefix", s;
+    getline(cin, s);
     Tree tree;
+    node p("");
+    tree.setroot(&p);
     tree.build(z, s, tree.getroot());
+    cout << tree.makepostfix(tree.getroot());
     return 0;
 }
