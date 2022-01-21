@@ -59,7 +59,7 @@ node::node(string c) {
 
 class Tree{
     node* root;
-    vector<int> blnc;
+    //vector<int> blnc;
 public:
     node* getroot();
     void setroot(node* p);
@@ -75,16 +75,23 @@ Tree::Tree() {
 
 void Tree::build(const string& z, string& s, node* p) {
     if(z == "infix") {
+        vector<int> blnc;
+        for(int i = 0;i < s.size();i++){
+            if(s[i] == ' '){
+                s = s.substr(0, i) + s.substr(i + 1);
+                i--;
+            }
+        }
         if (blnc.empty()) {
-            blnc.resize(s.size(), 10);
+            blnc.resize(s.size(), 0);
             int balance = 0;
             for (int i = 0; i < s.size(); i++) {
                 if (s[i] == '(') {
                     balance++;
                     blnc[i] = balance;
                 } else if (s[i] == ')') {
-                    balance--;
                     blnc[i] = balance;
+                    balance--;
                 } else {
                     blnc[i] = balance;
                 }
@@ -92,7 +99,7 @@ void Tree::build(const string& z, string& s, node* p) {
         }
         int min = 1e9 + 7, minel = 0;
         for(int i = s.size() - 1;i >= 0;i--){
-            if(blnc[i] < min){
+            if(s[i] != '(' && s[i] != ')' && blnc[i] < min){
                 min = blnc[i];
                 minel = i;
             }
@@ -101,7 +108,10 @@ void Tree::build(const string& z, string& s, node* p) {
         while(i >= 0 && (s[i] != '+' && s[i] != '-' && s[i] != '*' && s[i] != '/')) i--;
         if(i == -1){
             for(int i = 0;i < s.size();i++){
-                if(s[i] == ' ') s = s.substr(0, i) + s.substr(i + 1);
+                if(s[i] == ' ' || s[i] == ')' || s[i] == '(') {
+                    s = s.substr(0, i) + s.substr(i + 1);
+                    i--;
+                }
             }
             p->setval(s);
             return;
@@ -189,14 +199,13 @@ string Tree::makeprefix(node* p) {
 string Tree::makeinfix(node* p) {
     string s = "";
     if(p == nullptr) return "";
-    s += ")";
+    s = s + ")";
     s = makeinfix(p->getr()) + s;
-    s = " " + s;
     s = p->getval() + s;
     s = " " + s;
     s = makeinfix(p->getl()) + s;
-    s = " " + s;
     s = "(" + s;
+    return s;
 }
 
 node *Tree::getroot() {
@@ -207,13 +216,54 @@ void Tree::setroot(node* p) {
     root = p;
 }
 
+string clear(string h){
+    h = h.substr(1, h.size() - 2);
+    for(int i = 0;i < h.size();i++){
+        if(h[i] == '('){
+            int j = i + 1;
+            bool ok = true;
+            while(h[j] != ')') {
+                if(h[j] == '(' || h[j] == '+' || h[j] == '-' || h[j] == '*' || h[j] == '/') {
+                    ok = false;
+                    break;
+                }
+                j++;
+            }
+            if(ok){
+                h = h.substr(0, j) + h.substr(j + 1);
+                h = h.substr(0, i) + h.substr(i + 1);
+                i -= 2;
+            }
+        }
+    }
+    return h;
+}
+
 int main() {
-    string z = "infix", s;
+    string z, s;
+    cin >> z;
+    char c;
+    while(cin.get(c) && c != '\n'){}
     getline(cin, s);
     Tree tree;
     node p("");
     tree.setroot(&p);
     tree.build(z, s, tree.getroot());
-    cout << tree.makepostfix(tree.getroot());
+    if(z == "infix") {
+        cout << tree.makepostfix(tree.getroot()) << endl;
+        cout << tree.makeprefix(tree.getroot()) << endl;
+    }
+    else if(z == "postfix"){
+        string h = tree.makeinfix(tree.getroot());
+        h = clear(h);
+        cout << h << endl;
+        cout << tree.makeprefix(tree.getroot()) << endl;
+    }
+    else if(z == "prefix"){
+        string h = tree.makepostfix(tree.getroot());
+        h = clear(h);
+        cout << h << endl;
+        cout << tree.makeinfix(tree.getroot()) << endl;
+    }
     return 0;
 }
