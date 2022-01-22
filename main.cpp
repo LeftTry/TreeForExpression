@@ -232,7 +232,7 @@ string clear(string h){
             if(ok){
                 h = h.substr(0, j) + h.substr(j + 1);
                 h = h.substr(0, i) + h.substr(i + 1);
-                i -= 2;
+                i = j - 2;
             }
         }
     }
@@ -260,10 +260,10 @@ int main() {
         cout << tree.makeprefix(tree.getroot()) << endl;
     }
     else if(z == "prefix"){
-        string h = tree.makepostfix(tree.getroot());
+        string h = tree.makeinfix(tree.getroot());
         h = clear(h);
         cout << h << endl;
-        cout << tree.makeinfix(tree.getroot()) << endl;
+        cout << tree.makepostfix(tree.getroot()) << endl;
     }
     return 0;
 }
